@@ -87,6 +87,12 @@ public class SocketClient {
             ms.Position = 0;
             BinaryWriter writer = new BinaryWriter(ms);
             ushort msglen = (ushort)message.Length;
+			if (BitConverter.IsLittleEndian) {
+				// 小端转大端
+				byte[] bData = BitConverter.GetBytes(msglen);
+				Array.Reverse(bData);
+				msglen = BitConverter.ToUInt16(bData, 0);
+			}
             writer.Write(msglen);
             writer.Write(message);
             writer.Flush();
@@ -170,7 +176,13 @@ public class SocketClient {
         //Reset to beginning
         memStream.Seek(0, SeekOrigin.Begin);
         while (RemainingBytes() > 2) {
-            ushort messageLen = reader.ReadUInt16();
+			ushort messageLen = reader.ReadUInt16();
+			if (BitConverter.IsLittleEndian) {
+				// 小端转大端
+				byte[] bData = BitConverter.GetBytes(messageLen);
+				Array.Reverse(bData);
+				messageLen = BitConverter.ToUInt16(bData, 0);
+			}
             if (RemainingBytes() >= messageLen) {
                 MemoryStream ms = new MemoryStream();
                 BinaryWriter writer = new BinaryWriter(ms);
@@ -206,8 +218,9 @@ public class SocketClient {
         //int msglen = message.Length;
 
         ByteBuffer buffer = new ByteBuffer(message);
-        int mainId = buffer.ReadShort();
-        NetworkManager.AddEvent(mainId, buffer);
+        // int mainId = buffer.ReadShort();
+		// Debug.Log(string.Format("OnReceivedMessage len {0}", message.Length));
+		NetworkManager.AddEvent(Protocal.Message, buffer);
     }
 
 

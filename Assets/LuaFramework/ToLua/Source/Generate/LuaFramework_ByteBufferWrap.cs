@@ -17,6 +17,7 @@ public class LuaFramework_ByteBufferWrap
 		L.RegFunction("WriteString", WriteString);
 		L.RegFunction("WriteBytes", WriteBytes);
 		L.RegFunction("WriteBuffer", WriteBuffer);
+		L.RegFunction("WriteBufferWithoutLength", WriteBufferWithoutLength);
 		L.RegFunction("ReadByte", ReadByte);
 		L.RegFunction("ReadInt", ReadInt);
 		L.RegFunction("ReadShort", ReadShort);
@@ -26,6 +27,8 @@ public class LuaFramework_ByteBufferWrap
 		L.RegFunction("ReadString", ReadString);
 		L.RegFunction("ReadBytes", ReadBytes);
 		L.RegFunction("ReadBuffer", ReadBuffer);
+		L.RegFunction("ReadStringForMsg", ReadStringForMsg);
+		L.RegFunction("ReadBufferWithoutLength", ReadBufferWithoutLength);
 		L.RegFunction("ToBytes", ToBytes);
 		L.RegFunction("Flush", Flush);
 		L.RegFunction("New", _CreateLuaFramework_ByteBuffer);
@@ -234,6 +237,23 @@ public class LuaFramework_ByteBufferWrap
 	}
 
 	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+	static int WriteBufferWithoutLength(IntPtr L)
+	{
+		try
+		{
+			ToLua.CheckArgsCount(L, 2);
+			LuaFramework.ByteBuffer obj = (LuaFramework.ByteBuffer)ToLua.CheckObject<LuaFramework.ByteBuffer>(L, 1);
+			LuaByteBuffer arg0 = new LuaByteBuffer(ToLua.CheckByteBuffer(L, 2));
+			obj.WriteBufferWithoutLength(arg0);
+			return 0;
+		}
+		catch (Exception e)
+		{
+			return LuaDLL.toluaL_exception(L, e);
+		}
+	}
+
+	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
 	static int ReadByte(IntPtr L)
 	{
 		try
@@ -377,6 +397,40 @@ public class LuaFramework_ByteBufferWrap
 			ToLua.CheckArgsCount(L, 1);
 			LuaFramework.ByteBuffer obj = (LuaFramework.ByteBuffer)ToLua.CheckObject<LuaFramework.ByteBuffer>(L, 1);
 			LuaInterface.LuaByteBuffer o = obj.ReadBuffer();
+			ToLua.Push(L, o);
+			return 1;
+		}
+		catch (Exception e)
+		{
+			return LuaDLL.toluaL_exception(L, e);
+		}
+	}
+
+	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+	static int ReadStringForMsg(IntPtr L)
+	{
+		try
+		{
+			ToLua.CheckArgsCount(L, 1);
+			LuaFramework.ByteBuffer obj = (LuaFramework.ByteBuffer)ToLua.CheckObject<LuaFramework.ByteBuffer>(L, 1);
+			string o = obj.ReadStringForMsg();
+			LuaDLL.lua_pushstring(L, o);
+			return 1;
+		}
+		catch (Exception e)
+		{
+			return LuaDLL.toluaL_exception(L, e);
+		}
+	}
+
+	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+	static int ReadBufferWithoutLength(IntPtr L)
+	{
+		try
+		{
+			ToLua.CheckArgsCount(L, 1);
+			LuaFramework.ByteBuffer obj = (LuaFramework.ByteBuffer)ToLua.CheckObject<LuaFramework.ByteBuffer>(L, 1);
+			LuaInterface.LuaByteBuffer o = obj.ReadBufferWithoutLength();
 			ToLua.Push(L, o);
 			return 1;
 		}

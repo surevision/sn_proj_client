@@ -79,6 +79,10 @@ namespace LuaFramework {
             WriteBytes(strBuffer.buffer);
         }
 
+		public void WriteBufferWithoutLength(LuaByteBuffer strBuffer) {
+			writer.Write(strBuffer.buffer);
+		}
+
         public byte ReadByte() {
             return reader.ReadByte();
         }
@@ -123,6 +127,24 @@ namespace LuaFramework {
             byte[] bytes = ReadBytes();
             return new LuaByteBuffer(bytes);
         }
+			
+		public string ReadStringForMsg() {
+			ushort len = ReadShort();
+			if (BitConverter.IsLittleEndian) {
+				// 小端转大端
+				byte[] bData = BitConverter.GetBytes(len);
+				Array.Reverse(bData);
+				len = BitConverter.ToUInt16(bData, 0);
+			}
+			byte[] buffer = new byte[len];
+			buffer = reader.ReadBytes(len);
+			return Encoding.UTF8.GetString(buffer);
+		}
+
+		public LuaByteBuffer ReadBufferWithoutLength() {
+			byte[] bytes = reader.ReadBytes((int)reader.BaseStream.Length);
+			return new LuaByteBuffer(bytes);
+		}
 
         public byte[] ToBytes() {
             writer.Flush();

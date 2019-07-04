@@ -1,3 +1,5 @@
+
+require "Common/functions"
 local core = require "sproto.core"
 local assert = assert
 
@@ -176,32 +178,52 @@ local function gen_response(self, response, session)
 end
 
 function host:dispatch(...)
+	logWarn("before host:dispatch")
 	local bin = core.unpack(...)
+	logWarn("after host:dispatch "..tostring(#bin))
+	local data = {}
+	for i = 1, #bin do
+		data[#data + 1] = tostring(bin.byte(i))
+	end
+	logWarn("bin: "..table.concat(data, ","))
 	header_tmp.type = nil
 	header_tmp.session = nil
+	logWarn("before decode header, size")
 	local header, size = core.decode(self.__package, bin, header_tmp)
+	logWarn("after decode header, size "..tostring(header.type))
 	local content = bin:sub(size + 1)
 	if header.type then
 		-- request
+		logWarn("before queryproto")
 		local proto = queryproto(self.__proto, header.type)
+		logWarn("after queryproto")
 		local result
 		if proto.request then
+			logWarn("before decode request")
 			result = core.decode(proto.request, content)
+			logWarn("after decode request")
 		end
 		if header_tmp.session then
+			
+			logWarn("return request with session")
 			return "REQUEST", proto.name, result, gen_response(self, proto.response, header_tmp.session)
 		else
+			logWarn("return request without session")
 			return "REQUEST", proto.name, result
 		end
 	else
 		-- response
+		logWarn("check header_tmp.session "..tostring(header_tmp.session))
 		local session = assert(header_tmp.session, "session not found")
 		local response = assert(self.__session[session], "Unknown session")
 		self.__session[session] = nil
 		if response == true then
+			logWarn("return response with session")
 			return "RESPONSE", session
 		else
+			logWarn("before decode response")
 			local result = core.decode(response, content)
+			logWarn("after decode response")
 			return "RESPONSE", session, result
 		end
 	end

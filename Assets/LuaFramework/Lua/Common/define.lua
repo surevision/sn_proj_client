@@ -17,7 +17,7 @@ ProtocalType = {
 	SPROTO = 3,
 }
 --当前使用的协议类型--
-TestProtoType = ProtocalType.BINARY;
+TestProtoType = ProtocalType.SPROTO;
 
 Util = LuaFramework.Util;
 AppConst = LuaFramework.AppConst;

@@ -11,23 +11,43 @@ local sproto = require "3rd/sproto/sproto"
 local core = require "sproto.core"
 local print_r = require "3rd/sproto/print_r"
 
+local protos = require "Common/proto"
+
 Network = {};
 local this = Network;
 
 local transform;
 local gameObject;
 local islogging = false;
+local session = 0
 
 function Network.Start() 
     logWarn("Network.Start!!");
+    Network.InitProto()
     Event.AddListener(Protocal.Connect, this.OnConnect); 
     Event.AddListener(Protocal.Message, this.OnMessage); 
     Event.AddListener(Protocal.Exception, this.OnException); 
     Event.AddListener(Protocal.Disconnect, this.OnDisconnect); 
 end
 
+function Network.InitProto()
+    local host = sproto.new(protos.s2c):host "package"
+    local request = host:attach(sproto.new(protos.c2s))
+    Network.host = host
+    Network.request = request
+end
+
+function Network.Send(name, args)
+    session = session + 1
+    local package = Network.request(name, args, session)
+    local buffer = ByteBuffer.New();
+    buffer:WriteBufferWithoutLength(package);
+    networkMgr:SendMessage(buffer);
+end
+
 --Socket消息--
 function Network.OnSocket(key, data)
+    logWarn("Network.OnSocket "..tostring(key).." "..tostring(data))
     Event.Brocast(tostring(key), data);
 end
 
@@ -51,6 +71,7 @@ end
 
 --登录返回--
 function Network.OnMessage(buffer) 
+    logWarn('OnMessage-------->>>');
 	if TestProtoType == ProtocalType.BINARY then
 		this.TestLoginBinary(buffer);
 	end
@@ -60,15 +81,20 @@ function Network.OnMessage(buffer)
 	if TestProtoType == ProtocalType.PBC then
 		this.TestLoginPbc(buffer);
 	end
-	if TestProtoType == ProtocalType.SPROTO then
-		this.TestLoginSproto(buffer);
+    if TestProtoType == ProtocalType.SPROTO then
+        logWarn("Testing")
+        -- logWarn("test sproto decode "..tostring(buffer:ReadStringForMsg()))
+        local type, key, result = Network.host:dispatch(buffer:ReadStringForMsg())
+        logWarn("dispatch")
+        logWarn(tostring(type))
+        logWarn(tostring(key))
+        logWarn(tostring(result))
 	end
 	----------------------------------------------------
-    local ctrl = CtrlManager.GetCtrl(CtrlNames.Message);
-    if ctrl ~= nil then
-        ctrl:Awake();
-    end
-    logWarn('OnMessage-------->>>');
+    -- local ctrl = CtrlManager.GetCtrl(CtrlNames.Message);
+    -- if ctrl ~= nil then
+    --     ctrl:Awake();
+    -- end
 end
 
 --二进制登录--

@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 4269473747
+CRC: 3314893018
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: cd8b34ccd10e45362dfbc7c0f4cf6486
+    Hash: c6da77b3eac20312e558dcbff63869b7
   TypeTreeHash:
     serializedVersion: 2
     Hash: 5ad585dd02dfb5016c0dad519eab8f49
@@ -12,9 +12,9 @@ ClassTypes:
 - Class: 49
   Script: {instanceID: 0}
 Assets:
-- Assets/Lua/3rd/luabitop/bittest.lua.bytes
+- Assets/Lua/3rd/luabitop/installpath.lua.bytes
 - Assets/Lua/3rd/luabitop/md5test.lua.bytes
+- Assets/Lua/3rd/luabitop/bittest.lua.bytes
 - Assets/Lua/3rd/luabitop/nsievebits.lua.bytes
 - Assets/Lua/3rd/luabitop/bitbench.lua.bytes
-- Assets/Lua/3rd/luabitop/installpath.lua.bytes
 Dependencies: []

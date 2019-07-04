@@ -1,4 +1,4 @@
-
+local print_r = require "3rd/sproto/print_r"
 --输出日志--
 function log(str)
     Util.Log(str);
@@ -64,21 +64,13 @@ function unpack_package(text)
 end
 
 function print_request(name, args)
-	print("REQUEST", name)
-	if args then
-		for k,v in pairs(args) do
-			print(k,v)
-		end
-	end
+	log("REQUEST "..tostring(name))
+	print_r(args)
 end
 
 function print_response(session, args)
-	print("RESPONSE", session)
-	if args then
-		for k,v in pairs(args) do
-			print(k,v)
-		end
-	end
+	log("RESPONSE "..tostring(session))
+	print_r(args)
 end
 
 function print_package(t, ...)

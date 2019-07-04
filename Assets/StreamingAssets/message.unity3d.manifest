@@ -40,4 +40,4 @@ ClassTypes:
 Assets:
 - Assets/LuaFramework/Examples/Builds/Message/MessagePanel.prefab
 Dependencies:
-- E:/git/sn_proj/sn_proj_client/Assets/StreamingAssets/shared_asset.unity3d
+- D:/git/sn_proj/sn_proj_client/Assets/StreamingAssets/shared_asset.unity3d

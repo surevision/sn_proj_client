@@ -9,6 +9,7 @@ public class SocketCommand : ControllerCommand {
         object data = message.Body;
         if (data == null) return;
         KeyValuePair<int, ByteBuffer> buffer = (KeyValuePair<int, ByteBuffer>)data;
+		Debug.Log(string.Join(",", new List<byte>(buffer.Value.ToBytes()).ConvertAll(i => i.ToString()).ToArray()));
         switch (buffer.Key) {
             default: Util.CallMethod("Network", "OnSocket", buffer.Key, buffer.Value); break;
         }

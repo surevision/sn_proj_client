@@ -1,6 +1,5 @@
-
-require "Common/functions"
 local core = require "sproto.core"
+require "Common/functions"
 local assert = assert
 
 local sproto = {}
@@ -44,7 +43,7 @@ function sproto:host( packagename )
 	packagename = packagename or  "package"
 	local obj = {
 		__proto = self,
-		__package = core.querytype(self.__cobj, packagename),
+		__package = assert(core.querytype(self.__cobj, packagename), "type package not found"),
 		__session = {},
 	}
 	return setmetatable(obj, host_mt)
@@ -53,11 +52,20 @@ end
 local function querytype(self, typename)
 	local v = self.__tcache[typename]
 	if not v then
-		v = core.querytype(self.__cobj, typename)
+		v = assert(core.querytype(self.__cobj, typename), "type not found")
 		self.__tcache[typename] = v
 	end
 
 	return v
+end
+
+function sproto:exist_type(typename)
+	local v = self.__tcache[typename]
+	if not v then
+		return core.querytype(self.__cobj, typename) ~= nil
+	else
+		return true
+	end
 end
 
 function sproto:encode(typename, tbl)
@@ -99,6 +107,15 @@ local function queryproto(self, pname)
 	end
 
 	return v
+end
+
+function sproto:exist_proto(pname)
+	local v = self.__pcache[pname]
+	if not v then
+		return core.protocol(self.__cobj, pname) ~= nil
+	else
+		return true
+	end
 end
 
 function sproto:request_encode(protoname, tbl)
@@ -164,9 +181,10 @@ end
 local header_tmp = {}
 
 local function gen_response(self, response, session)
-	return function(args)
+	return function(args, ud)
 		header_tmp.type = nil
 		header_tmp.session = session
+		header_tmp.ud = ud
 		local header = core.encode(self.__package, header_tmp)
 		if response then
 			local content = core.encode(response, args)
@@ -178,9 +196,7 @@ local function gen_response(self, response, session)
 end
 
 function host:dispatch(...)
-	logWarn("before host:dispatch")
 	local bin = core.unpack(...)
-	logWarn("after host:dispatch "..tostring(#bin))
 	local data = {}
 	for i = 1, #bin do
 		data[#data + 1] = tostring(bin.byte(i))
@@ -188,59 +204,48 @@ function host:dispatch(...)
 	logWarn("bin: "..table.concat(data, ","))
 	header_tmp.type = nil
 	header_tmp.session = nil
-	logWarn("before decode header, size")
+	header_tmp.ud = nil
 	local header, size = core.decode(self.__package, bin, header_tmp)
-	logWarn("after decode header, size "..tostring(header.type))
 	local content = bin:sub(size + 1)
 	if header.type then
 		-- request
-		logWarn("before queryproto")
 		local proto = queryproto(self.__proto, header.type)
-		logWarn("after queryproto")
 		local result
 		if proto.request then
-			logWarn("before decode request")
 			result = core.decode(proto.request, content)
-			logWarn("after decode request")
 		end
 		if header_tmp.session then
-			
-			logWarn("return request with session")
-			return "REQUEST", proto.name, result, gen_response(self, proto.response, header_tmp.session)
+			return "REQUEST", proto.name, result, gen_response(self, proto.response, header_tmp.session), header.ud
 		else
-			logWarn("return request without session")
-			return "REQUEST", proto.name, result
+			return "REQUEST", proto.name, result, nil, header.ud
 		end
 	else
 		-- response
-		logWarn("check header_tmp.session "..tostring(header_tmp.session))
 		local session = assert(header_tmp.session, "session not found")
 		local response = assert(self.__session[session], "Unknown session")
 		self.__session[session] = nil
 		if response == true then
-			logWarn("return response with session")
-			return "RESPONSE", session
+			return "RESPONSE", session, nil, header.ud
 		else
-			logWarn("before decode response")
 			local result = core.decode(response, content)
-			logWarn("after decode response")
-			return "RESPONSE", session, result
+			return "RESPONSE", session, result, header.ud
 		end
 	end
 end
 
 function host:attach(sp)
-	return function(name, args, session)
+	return function(name, args, session, ud)
 		local proto = queryproto(sp, name)
 		header_tmp.type = proto.tag
 		header_tmp.session = session
+		header_tmp.ud = ud
 		local header = core.encode(self.__package, header_tmp)
 
 		if session then
 			self.__session[session] = proto.response or true
 		end
 
-		if args then
+		if proto.request then
 			local content = core.encode(proto.request, args)
 			return core.pack(header ..  content)
 		else

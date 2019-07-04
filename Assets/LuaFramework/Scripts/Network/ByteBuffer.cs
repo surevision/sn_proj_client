@@ -127,7 +127,7 @@ namespace LuaFramework {
             byte[] bytes = ReadBytes();
             return new LuaByteBuffer(bytes);
         }
-			
+
 		public string ReadStringForMsg() {
 			ushort len = ReadShort();
 			if (BitConverter.IsLittleEndian) {
@@ -147,8 +147,15 @@ namespace LuaFramework {
 		}
 
         public byte[] ToBytes() {
-            writer.Flush();
-            return stream.ToArray();
+			if (reader != null) {
+				long pos = reader.BaseStream.Position;
+				byte[] result = reader.ReadBytes((int)reader.BaseStream.Length);
+				reader.BaseStream.Seek(pos, SeekOrigin.Begin);
+				return result;
+			} else {
+				writer.Flush();
+				return stream.ToArray();
+			}
         }
 
         public void Flush() {

@@ -82,13 +82,14 @@ function Network.OnMessage(buffer)
 		this.TestLoginPbc(buffer);
 	end
     if TestProtoType == ProtocalType.SPROTO then
-        logWarn("Testing")
-        -- logWarn("test sproto decode "..tostring(buffer:ReadStringForMsg()))
-        local type, key, result = Network.host:dispatch(buffer:ReadStringForMsg())
+        local type, key, result = Network.host:dispatch(buffer:ReadBufferWithoutLength())
         logWarn("dispatch")
-        logWarn(tostring(type))
-        logWarn(tostring(key))
-        logWarn(tostring(result))
+        logWarn("type "..tostring(type))
+        logWarn("key or session "..tostring(key))
+        logWarn("result "..tostring(result))
+        if result then
+            print_package(type, key, result)
+        end
 	end
 	----------------------------------------------------
     -- local ctrl = CtrlManager.GetCtrl(CtrlNames.Message);

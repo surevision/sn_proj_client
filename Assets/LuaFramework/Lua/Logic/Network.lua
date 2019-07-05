@@ -24,6 +24,7 @@ local session = 0
 function Network.Start() 
     logWarn("Network.Start!!");
     Network.InitProto()
+    Network.ReisterProtoResponse()
     Event.AddListener(Protocal.Connect, this.OnConnect); 
     Event.AddListener(Protocal.Message, this.OnMessage); 
     Event.AddListener(Protocal.Exception, this.OnException); 
@@ -35,6 +36,10 @@ function Network.InitProto()
     local request = host:attach(sproto.new(protos.c2s))
     Network.host = host
     Network.request = request
+end
+
+function Network.ReisterProtoResponse()
+
 end
 
 function Network.Send(name, args)

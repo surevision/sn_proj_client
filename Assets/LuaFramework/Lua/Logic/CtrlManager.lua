@@ -1,15 +1,15 @@
-require "Common/define"
-require "Controller/PromptCtrl"
-require "Controller/MessageCtrl"
-
 CtrlManager = {};
+
 local this = CtrlManager;
 local ctrlList = {};	--控制器列表--
 
 function CtrlManager.Init()
 	logWarn("CtrlManager.Init----->>>");
-	ctrlList[CtrlNames.Prompt] = PromptCtrl.New();
-	ctrlList[CtrlNames.Message] = MessageCtrl.New();
+	for key, name in pairs(CtrlNames) do
+		require ("Controller/"..tostring(name))
+		logWarn("require "..tostring("Controller/"..tostring(name)).." "..tostring(_G[name]))
+		ctrlList[name] = _G[name].New()
+	end
 	return this;
 end
 

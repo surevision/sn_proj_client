@@ -1,5 +1,4 @@
 local core = require "sproto.core"
-require "Common/functions"
 local assert = assert
 
 local sproto = {}
@@ -201,7 +200,6 @@ function host:dispatch(...)
 	for i = 1, #bin do
 		data[#data + 1] = tostring(bin.byte(i))
 	end
-	logWarn("bin: "..table.concat(data, ","))
 	header_tmp.type = nil
 	header_tmp.session = nil
 	header_tmp.ud = nil

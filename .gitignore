@@ -35,3 +35,4 @@ Materials
 *.sav
 
 build/
+Assets/StreamingAssets/

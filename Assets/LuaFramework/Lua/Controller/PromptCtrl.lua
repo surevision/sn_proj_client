@@ -1,5 +1,3 @@
-require "Common/define"
-
 require "3rd/pblua/login_pb"
 require "3rd/pbc/protobuf"
 
